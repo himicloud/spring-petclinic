@@ -13,49 +13,6 @@
         name: git
         state: present
 
-    - name: Install Amazon SSM Agent
-      ansible.builtin.get_url:
-        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.deb"
-        dest: /tmp/amazon-ssm-agent.deb
-
-    - name: Install downloaded SSM Agent package
-      ansible.builtin.apt:
-        deb: /tmp/amazon-ssm-agent.deb
-        state: present
-
-    - name: Start Amazon SSM Agent
-      ansible.builtin.systemd:
-        name: amazon-ssm-agent
-        state: started
-        enabled: yes
-
-    - name: Install Amazon CloudWatch Agent
-      ansible.builtin.get_url:
-        url: "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
-        dest: /tmp/amazon-cloudwatch-agent.deb
-
-    - name: Install downloaded CloudWatch Agent package
-      ansible.builtin.apt:
-        deb: /tmp/amazon-cloudwatch-agent.deb
-        state: present
-
-    - name: Start Amazon CloudWatch Agent
-      ansible.builtin.command:
-        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start"
-
-    - name: Check Amazon CloudWatch Agent status
-      ansible.builtin.command:
-        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status"
-
-    - name: Download AWS Inspector
-      ansible.builtin.get_url:
-        url: "https://inspector-agent.amazonaws.com/linux/latest/install"
-        dest: /tmp/install
-        mode: '0755'
-
-    - name: Install AWS Inspector
-      ansible.builtin.shell: "bash /tmp/install"
-
     - name: Install Docker
       ansible.builtin.apt:
         name: docker.io
