@@ -28,37 +28,20 @@
         enabled: yes
 
     # Amazon SSM Agent Installation
-    - name: Create temporary directory for SSM
-      ansible.builtin.file:
-        path: /tmp/ssm
-        state: directory
+    - name: Check if Amazon SSM Agent is installed via Snap
+      ansible.builtin.command: snap list amazon-ssm-agent
+      register: ssm_agent_snap_installed
+      ignore_errors: yes
 
-    - name: Download Amazon SSM Agent for Ubuntu (x86_64)
-      ansible.builtin.get_url:
-        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb"
-        dest: /tmp/ssm/amazon-ssm-agent.deb
-      when: ansible_architecture == "x86_64"
+    - name: Install Amazon SSM Agent via Snap
+      ansible.builtin.command: snap install amazon-ssm-agent --classic
+      when: ssm_agent_snap_installed.rc != 0
 
-    - name: Download Amazon SSM Agent for Ubuntu (ARM64)
-      ansible.builtin.get_url:
-        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb"
-        dest: /tmp/ssm/amazon-ssm-agent.deb
-      when: ansible_architecture == "aarch64"
-
-    - name: Install Amazon SSM Agent
-      ansible.builtin.apt:
-        deb: /tmp/ssm/amazon-ssm-agent.deb
-        state: present
-
-    - name: Enable Amazon SSM Agent service
+    - name: Enable and Start Amazon SSM Agent (Snap version)
       ansible.builtin.systemd:
-        name: amazon-ssm-agent
-        enabled: yes
-
-    - name: Start Amazon SSM Agent service
-      ansible.builtin.systemd:
-        name: amazon-ssm-agent
+        name: snap.amazon-ssm-agent.amazon-ssm-agent
         state: started
+        enabled: yes
 
     # Amazon CloudWatch Agent Installation
     - name: Download Amazon CloudWatch Agent for Ubuntu
