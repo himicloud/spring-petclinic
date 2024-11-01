@@ -1,0 +1,49 @@
+---
+- name: Install required software packages on Amazon Linux
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package list
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Install Git
+      ansible.builtin.yum:
+        name: git
+        state: present
+
+    - name: Install Amazon SSM Agent
+      ansible.builtin.yum:
+        name: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+        state: present
+
+    - name: Start Amazon SSM Agent
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        state: started
+        enabled: yes
+
+    - name: Install Amazon CloudWatch Agent
+      ansible.builtin.yum:
+        name: "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
+        state: present
+
+    - name: Start Amazon CloudWatch Agent
+      ansible.builtin.command: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start"
+
+    - name: Check Amazon CloudWatch Agent status
+      ansible.builtin.command: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status"
+
+    - name: Download AWS Inspector
+      ansible.builtin.get_url:
+        url: "https://inspector-agent.amazonaws.com/linux/latest/install"
+        dest: /tmp/install
+        mode: '0755'
+
+    - name: Install AWS Inspector
+      ansible.builtin.shell: "bash /tmp/install"
+
+    - name: Install Docker
+      ans
