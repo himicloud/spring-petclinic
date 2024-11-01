@@ -1,22 +1,26 @@
 ---
-- name: Install required software packages on Amazon Linux
+- name: Install required software packages on Ubuntu
   hosts: all
   become: yes
   tasks:
     - name: Update package list
-      ansible.builtin.yum:
-        name: "*"
-        state: latest
+      ansible.builtin.apt:
         update_cache: yes
+        upgrade: yes
 
     - name: Install Git
-      ansible.builtin.yum:
+      ansible.builtin.apt:
         name: git
         state: present
 
     - name: Install Amazon SSM Agent
-      ansible.builtin.yum:
-        name: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+      ansible.builtin.get_url:
+        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.deb"
+        dest: /tmp/amazon-ssm-agent.deb
+
+    - name: Install downloaded SSM Agent package
+      ansible.builtin.apt:
+        deb: /tmp/amazon-ssm-agent.deb
         state: present
 
     - name: Start Amazon SSM Agent
@@ -26,8 +30,13 @@
         enabled: yes
 
     - name: Install Amazon CloudWatch Agent
-      ansible.builtin.yum:
-        name: "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
+      ansible.builtin.get_url:
+        url: "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
+        dest: /tmp/amazon-cloudwatch-agent.deb
+
+    - name: Install downloaded CloudWatch Agent package
+      ansible.builtin.apt:
+        deb: /tmp/amazon-cloudwatch-agent.deb
         state: present
 
     - name: Start Amazon CloudWatch Agent
@@ -48,8 +57,8 @@
       ansible.builtin.shell: "bash /tmp/install"
 
     - name: Install Docker
-      ansible.builtin.yum:
-        name: docker
+      ansible.builtin.apt:
+        name: docker.io
         state: present
 
     - name: Start Docker service
