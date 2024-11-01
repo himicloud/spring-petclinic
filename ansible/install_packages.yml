@@ -3,16 +3,19 @@
   hosts: all
   become: yes
   tasks:
+    # Update package list and upgrade packages
     - name: Update package list
       ansible.builtin.apt:
         update_cache: yes
         upgrade: yes
 
+    # Install Git
     - name: Install Git
       ansible.builtin.apt:
         name: git
         state: present
 
+    # Install Docker
     - name: Install Docker
       ansible.builtin.apt:
         name: docker.io
@@ -23,3 +26,55 @@
         name: docker
         state: started
         enabled: yes
+
+    # Amazon SSM Agent Installation
+    - name: Create temporary directory for SSM
+      ansible.builtin.file:
+        path: /tmp/ssm
+        state: directory
+
+    - name: Download Amazon SSM Agent for Ubuntu (x86_64)
+      ansible.builtin.get_url:
+        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb"
+        dest: /tmp/ssm/amazon-ssm-agent.deb
+      when: ansible_architecture == "x86_64"
+
+    - name: Download Amazon SSM Agent for Ubuntu (ARM64)
+      ansible.builtin.get_url:
+        url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb"
+        dest: /tmp/ssm/amazon-ssm-agent.deb
+      when: ansible_architecture == "aarch64"
+
+    - name: Install Amazon SSM Agent
+      ansible.builtin.apt:
+        deb: /tmp/ssm/amazon-ssm-agent.deb
+        state: present
+
+    - name: Enable Amazon SSM Agent service
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        enabled: yes
+
+    - name: Start Amazon SSM Agent service
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        state: started
+
+    # Amazon CloudWatch Agent Installation
+    - name: Download Amazon CloudWatch Agent for Ubuntu
+      ansible.builtin.get_url:
+        url: "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
+        dest: /tmp/amazon-cloudwatch-agent.deb
+
+    - name: Install Amazon CloudWatch Agent
+      ansible.builtin.apt:
+        deb: /tmp/amazon-cloudwatch-agent.deb
+        state: present
+
+    - name: Start Amazon CloudWatch Agent
+      ansible.builtin.command:
+        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start"
+
+    - name: Verify Amazon CloudWatch Agent status
+      ansible.builtin.command:
+        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status"
