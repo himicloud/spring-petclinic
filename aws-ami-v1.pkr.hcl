@@ -5,6 +5,10 @@ packer {
       version = ">= 0.0.2"
       source  = "github.com/hashicorp/amazon"
     }
+    ansible = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/ansible"
+    }
   }
 }
 
@@ -17,13 +21,13 @@ source "amazon-ebs" "ubuntu-ami" {
   ssh_username    = "ubuntu"
 }
 
-# Build configuration using only Ansible for provisioning
+# Build configuration using Ansible for provisioning
 build {
   name    = "hq-packer"
   sources = ["source.amazon-ebs.ubuntu-ami"]
 
   # Provisioner to run the Ansible playbook
   provisioner "ansible" {
-    playbook_file = "/ansible/install_packages.yml"
+    playbook_file = "ansible/install_packages.yml"  # Adjusted for relative path
   }
 }
