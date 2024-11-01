@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        PACKER_FILE = '**aws-ami-v1.pkr.hcl**'  // Confirm this is the correct Packer file name
+        PACKER_FILE = 'aws-ami-v1.pkr.hcl'
         REPO_URL = 'https://github.com/himicloud/spring-petclinic.git'
-        REPO_DIR = '**ansible**'  // Confirm this is the correct directory name for cloning
-        SONAR_TOKEN = credentials('**sonar_token**')  // Ensure SonarCloud token is saved with this ID
+        REPO_DIR = 'ansible'
+        SONAR_TOKEN = credentials('sonar_token')
     }
 
     tools {
-        sonar '**SonarQubeScanner**' // Name must match the SonarQube Scanner configured in Global Tool Configuration
+        sonar 'SonarCloud' // Use 'SonarCloud' as the tool name
     }
 
     stages {
@@ -25,7 +25,7 @@ pipeline {
                 withCredentials([
                     [
                         $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: '**aws_credential**',  // Verify this ID for AWS credentials
+                        credentialsId: 'aws_credential',
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
@@ -40,7 +40,7 @@ pipeline {
                 withCredentials([
                     [
                         $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: '**aws_credential**',  // Confirm AWS credentials ID
+                        credentialsId: 'aws_credential',
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
@@ -54,9 +54,9 @@ pipeline {
         stage("SonarCloud Analysis") {
             steps {
                 script {
-                    def scannerHome = tool '**SonarQubeScanner**' // Verify the SonarQubeScanner name
+                    def scannerHome = tool 'SonarCloud'
                     withSonarQubeEnv('SonarCloud') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.organization='**himicloud**' -Dsonar.projectKey='**himicloud_spring-petclinic**' -Dsonar.login=${SONAR_TOKEN}"
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.organization='himicloud' -Dsonar.projectKey='himicloud_spring-petclinic' -Dsonar.login=${SONAR_TOKEN}"
                     }
                 }
             }
