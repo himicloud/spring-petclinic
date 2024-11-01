@@ -1,0 +1,24 @@
+---
+- name: Install Ansible on Ubuntu
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install software-properties-common
+      ansible.builtin.apt:
+        name: software-properties-common
+        state: present
+
+    - name: Add Ansible PPA repository
+      ansible.builtin.apt_repository:
+        repo: "ppa:ansible/ansible"
+        state: present
+        update_cache: yes
+
+    - name: Install Ansible
+      ansible.builtin.apt:
+        name: ansible
+        state: present

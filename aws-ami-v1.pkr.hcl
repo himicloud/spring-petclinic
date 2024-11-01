@@ -29,5 +29,6 @@ build {
   # Provisioner to run the Ansible playbook
   provisioner "ansible" {
     playbook_file = "ansible/install_packages.yml"  # Adjusted for relative path
+    
   }
 }
