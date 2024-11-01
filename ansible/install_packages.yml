@@ -31,10 +31,12 @@
         state: present
 
     - name: Start Amazon CloudWatch Agent
-      ansible.builtin.command: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start"
+      ansible.builtin.command:
+        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start"
 
     - name: Check Amazon CloudWatch Agent status
-      ansible.builtin.command: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status"
+      ansible.builtin.command:
+        cmd: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status"
 
     - name: Download AWS Inspector
       ansible.builtin.get_url:
@@ -46,4 +48,12 @@
       ansible.builtin.shell: "bash /tmp/install"
 
     - name: Install Docker
-      ans
+      ansible.builtin.yum:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
