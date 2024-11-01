@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool name: 'SonarQubeScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    withSonarQubeEnv('SonarQubeScanner') { // Matches the configured name in your screenshot
+                    withSonarQubeEnv('SonarQubeScanner') {
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.organization='himicloud' -Dsonar.projectKey='himicloud_spring-petclinic' -Dsonar.login=${SONAR_TOKEN}"
                     }
                 }
@@ -60,4 +60,8 @@ pipeline {
     }
 
     post {
-        
+        always {
+            echo 'Pipeline completed'
+        }
+    }
+}
