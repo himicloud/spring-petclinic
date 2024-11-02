@@ -1,22 +1,7 @@
 pipeline {
     agent any
-
-    environment {
-        PACKER_FILE = 'aws-ami-v1.pkr.hcl'
-        REPO_URL = 'https://github.com/himicloud/spring-petclinic.git'
-        REPO_DIR = 'ansible'
-        PLAYBOOK_PATH = 'spring-petclinic/ansible/install_packages.yml' // Correct Ansible playbook path
-    }
-
     stages {
-        stage("Clone Repository") {
-            steps {
-                sh "rm -rf ${REPO_DIR}"
-                sh "git clone ${REPO_URL} ${REPO_DIR}"
-            }
-        }
-
-        stage("AWS Configuration Check") {
+        stage("AWS Demo") {
             steps {
                 withCredentials([
                     [
@@ -26,18 +11,10 @@ pipeline {
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
                 ]) {
-                    sh "aws s3 ls" // Confirm AWS credentials
+                    sh "aws s3 ls"
                 }
             }
         }
-
-        stage("Run Ansible Playbook") {
-            steps {
-                // Running the Ansible playbook to configure the AMI
-                sh "ansible-playbook -i 'localhost,' -c local ${PLAYBOOK_PATH}"
-            }
-        }
-
         stage("Building AMI") {
             steps {
                 withCredentials([
@@ -48,16 +25,10 @@ pipeline {
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
                 ]) {
-                    sh "cd ${REPO_DIR} && packer init ${PACKER_FILE}"
-                    sh "cd ${REPO_DIR} && packer build ${PACKER_FILE}"
+                    sh "packer init aws-ami-v1.pkr.hcl"
+                    sh "packer build aws-ami-v1.pkr.hcl"
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'AMI creation pipeline completed'
         }
     }
 }
