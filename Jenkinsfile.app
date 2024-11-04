@@ -1,16 +1,20 @@
 pipeline {
     agent any
-    
+
     environment {
         AWS_ACCESS_KEY_ID = credentials('aws_credential')
         AWS_SECRET_ACCESS_KEY = credentials('aws_credential')
+        SONAR_PROJECT_KEY = 'himicloud_spring-petclinic'
+        SONAR_ORGANIZATION = 'himicloud'
+        SONAR_HOST_URL = 'https://sonarcloud.io'
+        SONAR_LOGIN = credentials('sonar-token')  // SonarCloud token from Jenkins credentials
     }
 
     stages {
         stage('Preparation') {
             steps {
                 script {
-                    // Cloning the repository into the 'ansible' directory as specified
+                    // Cloning the repository
                     checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/himicloud/spring-petclinic.git']]])
                 }
             }
@@ -20,7 +24,7 @@ pipeline {
             parallel {
                 stage('Snyk Scan') {
                     environment {
-                        SNYK_TOKEN = credentials('snyk_token')  // Add Snyk token from Jenkins credentials
+                        SNYK_TOKEN = credentials('snyk_token')  // Snyk token from Jenkins credentials
                     }
                     steps {
                         // Authenticate with Snyk and run the scan
@@ -31,10 +35,14 @@ pipeline {
                 stage('SonarCloud Analysis') {
                     steps {
                         script {
-                            // Using SonarQube Scanner
-                            def scannerHome = tool 'SonarQubeScanner'
-                            withSonarQubeEnv('SonarQubeScanner') {  // Use the exact name configured in Global Tool Configuration
-                                sh "${scannerHome}/bin/sonar-scanner"
+                            def scannerHome = tool 'SonarQubeScanner'  // Ensure SonarQube Scanner is configured in Jenkins
+                            withSonarQubeEnv('SonarQubeScanner') {
+                                sh "${scannerHome}/bin/sonar-scanner " +
+                                   "-Dsonar.projectKey=${env.SONAR_PROJECT_KEY} " +
+                                   "-Dsonar.organization=${env.SONAR_ORGANIZATION} " +
+                                   "-Dsonar.sources=. " +
+                                   "-Dsonar.host.url=${env.SONAR_HOST_URL} " +
+                                   "-Dsonar.login=${env.SONAR_LOGIN}"
                             }
                         }
                     }
@@ -46,10 +54,10 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                        // Build Docker image for advanced users
+                        // Build Docker image for main branch
                         sh 'docker build -t spring-petclinic .'
                     } else {
-                        // Use Maven for freshers to create JAR/WAR
+                        // Build JAR/WAR file for feature branches
                         sh 'mvn clean package'
                     }
                 }
@@ -58,7 +66,7 @@ pipeline {
 
         stage('AWS Configuration Check') {
             steps {
-                // Validate AWS credentials by listing S3 buckets
+                // Check AWS credentials by listing S3 buckets
                 sh 'aws s3 ls'
             }
         }
@@ -67,17 +75,17 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                        // Push Docker image to Artifactory/Docker Hub
+                        // Push Docker image to repository
                         sh 'docker tag spring-petclinic:latest your-repo/spring-petclinic:latest'
                         sh 'docker push your-repo/spring-petclinic:latest'
                     } else {
-                        // Upload JAR/WAR to Artifactory/S3
-                        sh 'jfrog rt u target/*.jar repo/path'
+                        // Upload JAR/WAR file to JFrog Artifactory or S3
+                        sh 'jfrog rt u target/*.jar your-artifactory-repo/path'
                     }
                 }
             }
         }
-        
+
         stage('Differentiated Tagging') {
             steps {
                 script {
@@ -90,7 +98,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo "Pipeline completed successfully!"
