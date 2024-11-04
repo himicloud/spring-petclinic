@@ -2,12 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws_credential')
-        AWS_SECRET_ACCESS_KEY = credentials('aws_credential')
         SONAR_PROJECT_KEY = 'himicloud_spring-petclinic'
         SONAR_ORGANIZATION = 'himicloud'
         SONAR_HOST_URL = 'https://sonarcloud.io'
-        SONAR_LOGIN = credentials('sonar_token')  // SonarCloud token from Jenkins credentials
     }
 
     stages {
@@ -33,6 +30,9 @@ pipeline {
                     }
                 }
                 stage('SonarCloud Analysis') {
+                    environment {
+                        SONAR_TOKEN = credentials('sonar_token')  // SonarCloud token from Jenkins credentials
+                    }
                     steps {
                         script {
                             def scannerHome = tool 'SonarQubeScanner'  // Ensure SonarQube Scanner is configured in Jenkins
@@ -43,7 +43,8 @@ pipeline {
                                     -Dsonar.organization=${SONAR_ORGANIZATION} \
                                     -Dsonar.sources=. \
                                     -Dsonar.host.url=${SONAR_HOST_URL} \
-                                    -Dsonar.login=$SONAR_LOGIN
+                                    -Dsonar.token=$SONAR_TOKEN \
+                                    -Dsonar.java.binaries=build/classes/java/main
                                 """
                             }
                         }
@@ -68,8 +69,15 @@ pipeline {
 
         stage('AWS Configuration Check') {
             steps {
-                // Check AWS credentials by listing S3 buckets
-                sh 'aws s3 ls'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws_credential',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    // Check AWS credentials by listing S3 buckets
+                    sh 'aws s3 ls'
+                }
             }
         }
 
