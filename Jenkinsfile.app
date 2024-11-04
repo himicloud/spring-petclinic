@@ -17,6 +17,20 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        // Build Docker image for main branch
+                        sh 'docker build -t spring-petclinic .'
+                    } else {
+                        // Build JAR/WAR file for feature branches
+                        sh 'mvn clean package'
+                    }
+                }
+            }
+        }
+
         stage('Code Quality Checks') {
             parallel {
                 stage('Snyk Scan') {
@@ -44,24 +58,10 @@ pipeline {
                                     -Dsonar.sources=. \
                                     -Dsonar.host.url=${SONAR_HOST_URL} \
                                     -Dsonar.token=$SONAR_TOKEN \
-                                    -Dsonar.java.binaries=build/classes/java/main
+                                    -Dsonar.java.binaries=target/classes
                                 """
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                        // Build Docker image for main branch
-                        sh 'docker build -t spring-petclinic .'
-                    } else {
-                        // Build JAR/WAR file for feature branches
-                        sh 'mvn clean package'
                     }
                 }
             }
