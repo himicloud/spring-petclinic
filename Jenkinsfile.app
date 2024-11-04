@@ -19,8 +19,12 @@ pipeline {
         stage('Code Quality Checks') {
             parallel {
                 stage('Snyk Scan') {
+                    environment {
+                        SNYK_TOKEN = credentials('snyk_token')  // Add Snyk token from Jenkins credentials
+                    }
                     steps {
-                        // Add Snyk scan commands here
+                        // Authenticate with Snyk and run the scan
+                        sh 'snyk auth $SNYK_TOKEN'
                         sh 'snyk test'
                     }
                 }
@@ -29,7 +33,7 @@ pipeline {
                         script {
                             // Using SonarQube Scanner
                             def scannerHome = tool 'SonarQubeScanner'
-                            withSonarQubeEnv('SonarQubeScanner') {
+                            withSonarQubeEnv('SonarQubeServer') {  // Use the exact name configured in Global Tool Configuration
                                 sh "${scannerHome}/bin/sonar-scanner"
                             }
                         }
