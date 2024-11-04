@@ -33,7 +33,7 @@ pipeline {
                         script {
                             // Using SonarQube Scanner
                             def scannerHome = tool 'SonarQubeScanner'
-                            withSonarQubeEnv('SonarQubeServer') {  // Use the exact name configured in Global Tool Configuration
+                            withSonarQubeEnv('SonarQubeScanner') {  // Use the exact name configured in Global Tool Configuration
                                 sh "${scannerHome}/bin/sonar-scanner"
                             }
                         }
