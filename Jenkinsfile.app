@@ -9,7 +9,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'himicloud_spring-petclinic'
         SONAR_ORGANIZATION = 'himicloud'
         SONAR_HOST_URL = 'https://sonarcloud.io'
-        SONAR_TOKEN = credentials('sonar_token')  // SonarCloud token from Jenkins credentials
+        SONAR_TOKEN = credentials('sonar_token')  // Move Sonar token configuration to the top
     }
 
     stages {
@@ -49,13 +49,10 @@ pipeline {
                     }
                 }
                 stage('SonarCloud Analysis') {
-                    environment {
-                        SONAR_TOKEN = credentials('sonar_token')  // SonarCloud token from Jenkins credentials
-                    }
                     steps {
                         script {
-                            def scannerHome = tool 'SonarQubeScanner'  // Ensure SonarQube Scanner is configured in Jenkins
-                            withSonarQubeEnv('SonarCloud') {
+                            def scannerHome = tool 'SonarQubeScanner'  // Ensure this name matches the SonarQube Scanner configuration in Jenkins
+                            withSonarQubeEnv('SonarCloud') {  // Ensure this name matches the SonarQube server configuration in Jenkins
                                 sh """
                                     ${scannerHome}/bin/sonar-scanner \
                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
