@@ -7,7 +7,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'himicloud_spring-petclinic'
         SONAR_ORGANIZATION = 'himicloud'
         SONAR_HOST_URL = 'https://sonarcloud.io'
-        SONAR_LOGIN = credentials('sonar-token')  // SonarCloud token from Jenkins credentials
+        SONAR_LOGIN = credentials('sonar_token')  // SonarCloud token from Jenkins credentials
     }
 
     stages {
