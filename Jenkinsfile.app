@@ -14,8 +14,8 @@ pipeline {
     stages {
         stage('Preparation') {
             steps {
-                // Cloning the repository based on the pipeline branch
-                checkout([$class: 'GitSCM', branches: [[name: "*/${env.BRANCH_NAME}"]], userRemoteConfigs: [[url: 'https://github.com/himicloud/spring-petclinic.git']]])
+                // Cloning the repository, defaulting to main if BRANCH_NAME is not set
+                checkout([$class: 'GitSCM', branches: [[name: "*/${env.BRANCH_NAME ?: 'main'}"]], userRemoteConfigs: [[url: 'https://github.com/himicloud/spring-petclinic.git']]])
             }
         }
     }
