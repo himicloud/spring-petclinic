@@ -1,0 +1,42 @@
+---
+- name: Install Snyk CLI on Ubuntu
+  hosts: all
+  become: true
+  tasks:
+  
+    - name: Install Node.js and npm
+      apt:
+        name: nodejs
+        state: present
+        update_cache: yes
+
+    - name: Install npm (Node Package Manager)
+      apt:
+        name: npm
+        state: present
+
+    - name: Install Snyk CLI
+      npm:
+        name: snyk
+        global: yes
+      notify: Add Snyk to PATH
+
+    - name: Verify Snyk installation
+      shell: snyk --version
+      register: verify_result
+      changed_when: false
+
+    - name: Display Snyk version
+      debug:
+        msg: "Snyk CLI version installed: {{ verify_result.stdout }}"
+
+  handlers:
+    - name: Add Snyk to PATH
+      lineinfile:
+        path: /etc/profile.d/snyk.sh
+        line: 'export PATH=$PATH:/usr/local/bin'
+        create: yes
+      notify: Refresh environment
+
+    - name: Refresh environment
+      shell: . /etc/profile.d/snyk.sh

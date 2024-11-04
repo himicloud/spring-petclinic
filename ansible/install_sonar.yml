@@ -1,0 +1,31 @@
+---
+- name: Install SonarQube Scanner on Ubuntu
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Install required dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - wget
+        - unzip
+
+    - name: Download SonarQube Scanner
+      get_url:
+        url: "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip"
+        dest: "/tmp/sonar-scanner-cli-linux.zip"
+      register: download_result
+
+    - name: Unzip SonarQube Scanner
+      unarchive:
+        src: "/tmp/sonar-scanner-cli-linux.zip"
+        dest: "/opt/"
+        remote_src: yes
+      when: download_result.changed
+
+    - name: Rename the SonarQube Scanner folder
+      command: mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+      when: download_result.changed

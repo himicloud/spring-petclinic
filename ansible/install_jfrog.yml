@@ -1,0 +1,48 @@
+---
+- name: Install JFrog Platform
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Download JFrog installer
+      ansible.builtin.get_url:
+        url: "https://releases.jfrog.io/artifactory/jfrog-prox/org/artifactory/pro/deb/jfrog-platform-trial-prox/[RELEASE]/jfrog-platform-trial-prox-[RELEASE]-deb.tar.gz"
+        dest: /tmp/jfrog-deb-installer.tar.gz
+
+    - name: Extract JFrog installer
+      ansible.builtin.unarchive:
+        src: /tmp/jfrog-deb-installer.tar.gz
+        dest: /opt
+        remote_src: true
+
+    - name: Change to JFrog installation directory
+      ansible.builtin.command:
+        cmd: "cd /opt/jfrog-platform-trial-pro*"
+
+    - name: Run the JFrog installer
+      ansible.builtin.shell:
+        cmd: "./install.sh"
+        args:
+          chdir: "/opt/jfrog-platform-trial-pro*"
+
+    - name: Start Artifactory service
+      ansible.builtin.systemd:
+        name: artifactory.service
+        state: started
+        enabled: true
+
+    - name: Start Xray service
+      ansible.builtin.systemd:
+        name: xray.service
+        state: started
+        enabled: true
+
+    - name: Verify JFrog installation
+      ansible.builtin.uri:
+        url: "http://localhost:8082/"
+        status_code: 200
+        register: jfrog_status
+
+    - name: Display JFrog installation status
+      ansible.builtin.debug:
+        msg: "JFrog installation was successful" if jfrog_status.status == 200 else "Installation failed"
