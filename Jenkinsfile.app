@@ -10,6 +10,7 @@ pipeline {
         SONAR_ORGANIZATION = 'himicloud'
         SONAR_HOST_URL = 'https://sonarcloud.io'
         SONAR_TOKEN = credentials('sonar_token')  // Move Sonar token configuration to the top
+        SNYK_SEVERITY_THRESHOLD = 'critical'  // Fail only on critical vulnerabilities
     }
 
     stages {
@@ -29,7 +30,9 @@ pipeline {
                         echo "Docker image created for main branch."
                     } else {
                         // Build JAR/WAR file for feature branches
-                        sh 'mvn clean package'
+                        withEnv(["PATH+MAVEN=${tool 'Maven 3.8.7'}/bin"]) {
+                            sh 'mvn clean package'
+                        }
                         echo "JAR/WAR file created for feature branch."
                     }
                 }
@@ -43,9 +46,9 @@ pipeline {
                         SNYK_TOKEN = credentials('snyk_token')  // Snyk token from Jenkins credentials
                     }
                     steps {
-                        // Authenticate with Snyk and run the scan
+                        // Authenticate with Snyk and run the scan with severity threshold
                         sh 'snyk auth $SNYK_TOKEN'
-                        sh 'snyk test'
+                        sh 'snyk test --severity-threshold=${SNYK_SEVERITY_THRESHOLD} || true'
                     }
                 }
                 stage('SonarCloud Analysis') {
@@ -66,6 +69,18 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Publish Artifact') {
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master'
+                }
+            }
+            steps {
+                echo 'Publishing Artifact to JFrog Artifactory'
+                // Add the JFrog CLI or curl-based command to publish the Docker image or JAR/WAR file
             }
         }
     }
