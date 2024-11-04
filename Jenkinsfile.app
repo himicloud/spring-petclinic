@@ -18,6 +18,20 @@ pipeline {
                 checkout([$class: 'GitSCM', branches: [[name: "*/${env.BRANCH_NAME ?: 'main'}"]], userRemoteConfigs: [[url: 'https://github.com/himicloud/spring-petclinic.git']]])
             }
         }
+
+        stage('Build') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        // Build Docker image for main branch
+                        sh 'docker build -t spring-petclinic .'
+                    } else {
+                        // Build JAR/WAR file for feature branches
+                        sh 'mvn clean package'
+                    }
+                }
+            }
+        }
     }
 
     post {
