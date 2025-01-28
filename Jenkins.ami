@@ -15,6 +15,14 @@ pipeline {
                 }
             }
         }
+        stage("Verify File Path") {
+            steps {
+                script {
+                    // Check if the Ansible playbook file exists
+                    sh "ls -la ./spring-petclinic/ansible/"
+                }
+            }
+        }
         stage("Building AMI") {
             steps {
                 withCredentials([
@@ -25,10 +33,28 @@ pipeline {
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
                 ]) {
-                    sh "packer init aws-ami-v1.pkr.hcl"
-                    sh "packer build aws-ami-v1.pkr.hcl"
+                    script {
+                        // Initialize Packer plugins
+                        sh "packer init aws-ami-v1.pkr.hcl"
+
+                        // Debug Packer logs and build AMI
+                        sh """
+                        export PACKER_LOG=1
+                        export PACKER_LOG_PATH=packer.log
+                        packer build aws-ami-v1.pkr.hcl
+                        """
+                    }
                 }
             }
+        }
+    }
+    post {
+        always {
+            // Archive Packer log for debugging if needed
+            archiveArtifacts artifacts: 'packer.log', allowEmptyArchive: true
+        }
+        failure {
+            echo "Pipeline failed. Check packer.log for details."
         }
     }
 }
