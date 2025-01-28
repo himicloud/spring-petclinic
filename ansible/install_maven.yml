@@ -1,0 +1,56 @@
+- name: Install Maven on Ubuntu
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - wget
+        - unzip
+        - openjdk-11-jdk  # Install Java 11 (required for Maven)
+
+    - name: Download Maven
+      get_url:
+        url: "https://archive.apache.org/dist/maven/maven-3/3.8.7/binaries/apache-maven-3.8.7-bin.zip"
+        dest: "/tmp/apache-maven-3.8.7-bin.zip"
+        mode: '0755'
+
+    - name: Unzip Maven
+      unarchive:
+        src: "/tmp/apache-maven-3.8.7-bin.zip"
+        dest: "/opt"
+        remote_src: yes
+
+    - name: Create symlink for Maven
+      file:
+        src: "/opt/apache-maven-3.8.7"
+        dest: "/opt/maven"
+        state: link
+
+    - name: Add Maven to PATH
+      copy:
+        dest: /etc/profile.d/maven.sh
+        content: |
+          export M2_HOME=/opt/maven
+          export PATH=$M2_HOME/bin:$PATH
+        mode: '0755'
+
+    - name: Apply environment variables for Maven
+      shell: "source /etc/profile.d/maven.sh"
+      args:
+        executable: /bin/bash
+
+    - name: Verify Maven installation
+      command: mvn -version
+      register: maven_version
+      failed_when: maven_version.rc != 0
+
+    - debug:
+        msg: "Maven installed successfully: {{ maven_version.stdout }}"

@@ -41,9 +41,15 @@ resource "aws_security_group" "jenkins_sg" {
 
 resource "aws_instance" "jenkins" {
   ami             = var.ami_id
-  instance_type   = var.instance_type
-  key_name        = "my-key"  # Add your key pair here
+  instance_type   = var.instance_type  # Reference the instance type variable
+  key_name        = "my-kp-mumbai" # Add your key pair here
   security_groups = [aws_security_group.jenkins_sg.name]
+
+  # Configure root volume with specified volume size
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = var.volume_size  # Reference the volume size variable
+  }
 
   tags = {
     Name = "Jenkins-Server"

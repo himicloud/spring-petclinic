@@ -14,10 +14,10 @@ packer {
 
 # Define the base AMI and configuration details for Ubuntu in us-east-1
 source "amazon-ebs" "ubuntu-ami" {
-  region          = "us-east-1"
+  region          = "ap-south-1"
   ami_name        = "hq-ami-{{timestamp}}"
   instance_type   = "t2.micro"
-  source_ami      = "ami-0866a3c8686eaeeba" # Replace with the correct Ubuntu AMI ID
+  source_ami      = "ami-00bb6a80f01f03502" # Replace with the correct Ubuntu AMI ID
   ssh_username    = "ubuntu"
 }
 

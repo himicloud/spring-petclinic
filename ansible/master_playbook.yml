@@ -1,0 +1,8 @@
+# master_playbook.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_ansible.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_awscliv2.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_docker.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_jenkins.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_packer.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_snyk.yml
+- import_playbook: /Users/himitrades/devops-project-1/spring-petclinic/ansible/install_sonar.yml

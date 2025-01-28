@@ -43,6 +43,12 @@
         status_code: 200
         register: jfrog_status
 
-    - name: Display JFrog installation status
+    - name: Display success message if JFrog installation was successful
       ansible.builtin.debug:
-        msg: "JFrog installation was successful" if jfrog_status.status == 200 else "Installation failed"
+        msg: "JFrog installation was successful"
+      when: jfrog_status.status == 200
+
+    - name: Display failure message if JFrog installation failed
+      ansible.builtin.debug:
+        msg: "Installation failed"
+      when: jfrog_status.status != 200

@@ -1,0 +1,9 @@
+---
+- import_playbook: install_ansible.yml
+- import_playbook: install_awscliv2.yml
+- import_playbook: install_docker.yml
+- import_playbook: install_jenkins.yml
+- import_playbook: install_maven.yml
+- import_playbook: install_packer.yml
+- import_playbook: install_snyk.yml
+- import_playbook: install_sonar.yml
