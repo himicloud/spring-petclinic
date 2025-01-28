@@ -28,6 +28,6 @@ build {
 
   # Provisioner to run the Ansible playbook
   provisioner "ansible" {
-    playbook_file = "./spring-petclinic/ansible/install_packages.yml"
+    playbook_file = "./ansible/install_packages.yml"
   }
 }
