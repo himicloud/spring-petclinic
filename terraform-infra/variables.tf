@@ -19,11 +19,11 @@ variable "instance_type" {
   default     = "t2.micro"  # Adjust as needed
 }
 
-# Key Pair
+# Key pair
 variable "key_name" {
   description = "The name of the SSH key pair for accessing EC2 instances"
   type        = string
-  default     = "my-kp-mumbai.pem  # Replace with your actual key pair name
+  default     = "my-kp-mumbai.pem"  
 }
 
 # Volume Size for Root EBS Volume
