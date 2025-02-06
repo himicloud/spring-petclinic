@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "my-terraform-state-bucket-syd"  # Replace with your S3 bucket name
+    bucket         = "my-terraform-state-bucket-mumbai"  # New S3 bucket in Mumbai
     key            = "vpc/terraform.tfstate"  # Unique key for VPC state file
-    region         = "ap-southeast-2"  # Sydney region
-    dynamodb_table = "terraform-state-locks"  # DynamoDB table for state locking
+    region         = "ap-south-1"  # Mumbai region
+    dynamodb_table = "terraform-state-locks-mumbai"  # DynamoDB table for state locking
     encrypt        = true
   }
 }
