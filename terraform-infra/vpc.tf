@@ -12,9 +12,9 @@ resource "aws_vpc" "main_vpc" {
 
 # Public Subnets
 resource "aws_subnet" "public_subnet_1" {
-  vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "${var.aws_region}a"
+  vpc_id                  = aws_vpc.main_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -23,9 +23,9 @@ resource "aws_subnet" "public_subnet_1" {
 }
 
 resource "aws_subnet" "public_subnet_2" {
-  vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "${var.aws_region}b"
+  vpc_id                  = aws_vpc.main_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
 
   tags = {
@@ -185,9 +185,9 @@ resource "aws_lb_listener" "app_lb_listener" {
 # Launch Template for ASG instances
 resource "aws_launch_template" "app_launch_template" {
   name_prefix   = "app-launch-template"
-  image_id      = var.ami_id  # Replace with your desired AMI ID or variable
-  instance_type = var.instance_type  # Instance type, e.g., "t2.micro" or "t2.medium"
-  key_name      = var.key_name  # Replace with your key pair name
+  image_id      = var.ami_id        # Replace with your desired AMI ID or variable
+  instance_type = var.instance_type # Instance type, e.g., "t2.micro" or "t2.medium"
+  key_name      = var.key_name      # Replace with your key pair name
 
   # Attach security group to allow necessary traffic
   vpc_security_group_ids = [aws_security_group.private_instance_sg.id]
@@ -212,17 +212,17 @@ resource "aws_launch_template" "app_launch_template" {
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "app_asg" {
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  vpc_zone_identifier  = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
-  
+  desired_capacity    = 1
+  max_size            = 2
+  min_size            = 1
+  vpc_zone_identifier = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+
   launch_template {
     id      = aws_launch_template.app_launch_template.id
     version = "$Latest"
   }
 
-  target_group_arns = [aws_lb_target_group.app_tg.arn]  # Link to the ALB target group
+  target_group_arns = [aws_lb_target_group.app_tg.arn] # Link to the ALB target group
 
   health_check_type         = "EC2"
   health_check_grace_period = 300
