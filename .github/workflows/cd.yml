@@ -26,9 +26,10 @@ jobs:
           chmod +x argocd
           sudo mv argocd /usr/local/bin/
 
-      - name: Debug ArgoCD Server URL
+      - name: Debug ArgoCD Server (Base64)
         run: |
-          echo "Using ArgoCD Server: https://$ARGOCD_SERVER"
+          echo "ArgoCD Server Encoded: $(echo -n $ARGOCD_SERVER | base64)"
+
 
       - name: Test ArgoCD API Connectivity
         run: |
