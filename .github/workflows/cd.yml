@@ -28,7 +28,7 @@ jobs:
 
       - name: Debug ArgoCD Server (Base64)
         run: |
-          echo "ArgoCD Server Encoded: $(echo -n $ARGOCD_SERVER | base64)"
+          echo "ArgoCD Server: $(echo -n $ARGOCD_SERVER)"
 
 
       - name: Test ArgoCD API Connectivity
