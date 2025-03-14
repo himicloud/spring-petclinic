@@ -26,9 +26,19 @@ jobs:
           chmod +x argocd
           sudo mv argocd /usr/local/bin/
 
+      - name: Debug ArgoCD Server URL
+        run: |
+          echo "Using ArgoCD Server: https://$ARGOCD_SERVER"
+
+      - name: Test ArgoCD API Connectivity
+        run: |
+          curl -k -X POST https://$ARGOCD_SERVER/api/v1/session \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin", "password":"${{ secrets.ARGOCD_AUTH_TOKEN }}"}'
+
       - name: Login to ArgoCD
         run: |
-          argocd login $ARGOCD_SERVER --username admin --password $ARGOCD_AUTH_TOKEN --insecure
+          argocd login https://$ARGOCD_SERVER --username admin --password $ARGOCD_AUTH_TOKEN --grpc-web --insecure
 
       - name: Sync ArgoCD Application
         run: |
