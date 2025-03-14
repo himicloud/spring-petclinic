@@ -5,6 +5,7 @@ on:
 
 env:
   ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+  
 
 jobs:
   login:
