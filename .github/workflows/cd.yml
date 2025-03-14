@@ -37,9 +37,9 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"username":"admin", "password":"${{ secrets.ARGOCD_AUTH_TOKEN }}"}'
 
-      - name: Login to ArgoCD
-        run: |
-          argocd login https://$ARGOCD_SERVER --username admin --password $ARGOCD_AUTH_TOKEN --grpc-web --insecure
+      - name: Login to ArgoCD (LoadBalancer)
+        run: 
+          argocd login https://$ARGOCD_SERVER --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --grpc-web --insecure
 
       - name: Sync ArgoCD Application
         run: |
