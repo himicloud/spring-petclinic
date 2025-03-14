@@ -1,0 +1,30 @@
+name: CD - Login to Argo CD
+
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: petclinic-app
+  IMAGE_TAG: latest
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/
+
+      - name: Start Port Forwarding
+        run: |
+          kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+          sleep 5  # Wait for forwarding to establish
+
+      - name: Login to ArgoCD
+        run: |
+          argocd login localhost:8080 --username admin --password ${{ secrets.ARGOCD_ADMIN_PASSWORD }} --grpc-web --insecure
