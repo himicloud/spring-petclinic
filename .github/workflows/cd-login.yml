@@ -67,11 +67,3 @@ jobs:
       - name: Verify login
         run: |
           argocd app list
-
-      - name: Upload files for inspection
-        uses: actions/upload-artifact@v3
-        with:
-          name: debug-files
-          path: |
-            ~/.kube/config
-            /tmp/aws-cli-logs.txt
