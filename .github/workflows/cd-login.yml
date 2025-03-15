@@ -1,16 +1,30 @@
-name: CD - Login to Argo CD (LoadBalancer)
+name: Deploy to ArgoCD
 
 on:
-  workflow_dispatch:
-
-env:
-  ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-  
+  push:
+    branches:
+      - main  # Change to your deployment branch
 
 jobs:
-  login:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Login to ArgoCD (LoadBalancer)
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ArgoCD Login
         run: |
-          argocd login https://$ARGOCD_SERVER --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --grpc-web --insecure
+          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --insecure
+
+      - name: Sync ArgoCD App
+        run: |
+          argocd app sync my-app  # Replace 'my-app' with your actual ArgoCD application name
+
+      - name: Wait for Sync to Complete
+        run: |
+          argocd app wait my-app --health
+
+      - name: Verify Deployment Status
+        run: |
+          argocd app get my-app
