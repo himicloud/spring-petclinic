@@ -59,7 +59,7 @@ jobs:
           sleep 5 # Wait for port forwarding to stabilize
 
           # Log in to Argo CD using the forwarded port
-          argocd --port-forward --port-forward-namespace argocd --grpc-web --plaintext login \
+          argocd --port-forward --port-forward-namespace argocd --grpc-web --insecure --plaintext login \
             --username admin \
             --password "$ARGOCD_PASSWORD" \
             localhost:8080
