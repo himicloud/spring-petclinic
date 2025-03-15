@@ -29,7 +29,6 @@ jobs:
           argocd login $ARGOCD_SERVER \
             --username $ARGOCD_USERNAME \
             --password $ARGOCD_ADMIN_PASSWORD \
-            --insecure \ # Use --insecure if the server uses a self-signed certificate
             --grpc-web \ # Use --grpc-web if the server is behind a proxy or load balancer
             --skip-test-tls # Skip testing whether the server is configured with TLS
 
