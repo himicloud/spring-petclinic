@@ -27,10 +27,10 @@ jobs:
 
       - name: Configure kubectl
         env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }} # Base64-encoded kubeconfig file
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG }} # Base64-encoded kubeconfig file
         run: |
           mkdir -p ~/.kube
-          echo "$KUBE_CONFIG" | base64 --decode > ~/.kube/config
+          echo "$KUBECONFIG" | base64 --decode > ~/.kube/config
 
       - name: Log in to Argo CD using port forwarding
         env:
