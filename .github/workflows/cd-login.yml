@@ -13,18 +13,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd-linux-amd64
+          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+          argocd version --client
+
       - name: ArgoCD Login
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --insecure
-
-      - name: Sync ArgoCD App
-        run: |
-          argocd app sync my-app  # Replace 'my-app' with your actual ArgoCD application name
-
-      - name: Wait for Sync to Complete
-        run: |
-          argocd app wait my-app --health
-
-      - name: Verify Deployment Status
-        run: |
-          argocd app get my-app
+          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --
