@@ -22,4 +22,16 @@ jobs:
 
       - name: ArgoCD Login
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --
+          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --insecure
+
+      - name: Sync ArgoCD App
+        run: |
+          argocd app sync my-app  # Replace 'my-app' with your actual ArgoCD application name
+
+      - name: Wait for Sync to Complete
+        run: |
+          argocd app wait my-app --health
+
+      - name: Verify Deployment Status
+        run: |
+          argocd app get my-app
