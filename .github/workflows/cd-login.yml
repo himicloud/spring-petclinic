@@ -1,16 +1,33 @@
-name: CD - Login to Argo CD (LoadBalancer)
+name: Argo CD Login Pipeline
 
 on:
-  workflow_dispatch:
-
-env:
-  ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-  
+  workflow_dispatch: # Manual trigger, you can also add push/PR triggers
 
 jobs:
-  login:
+  argo-login:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Login to ArgoCD (LoadBalancer)
-        run: |
-          argocd login https://$ARGOCD_SERVER --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --grpc-web --insecure
+    - name: Checkout (optional if you need repo files)
+      uses: actions/checkout@v3
+
+    - name: Install ArgoCD CLI
+      run: |
+        curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x /usr/local/bin/argocd
+        argocd version --client
+
+    - name: Argo CD Login via CLI
+      env:
+        ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+        ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
+        ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
+      run: |
+        argocd login ${ARGOCD_SERVER} \
+          --username ${ARGOCD_USERNAME} \
+          --password ${ARGOCD_PASSWORD} \
+          --skip-test-tls --grpc-web --insecure
+
+    - name: (Optional) List Argo CD Apps
+      run: |
+        argocd app list --grpc-web --insecure
