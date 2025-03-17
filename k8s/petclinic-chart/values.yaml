@@ -1,0 +1,17 @@
+namespace: petclinic
+
+mysql:
+  image: mysql:5.7
+  user: petclinic
+  password: password
+  rootPassword: rootpassword
+  database: petclinic
+  storage: 5Gi
+
+petclinic:
+  image: 727646497975.dkr.ecr.ap-south-1.amazonaws.com/petclinic
+  tag : latest
+  replicas: 2
+  minReplicas: 2
+  maxReplicas: 10
+  serviceType: LoadBalancer
